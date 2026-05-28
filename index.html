@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jujutsu Kaisen — Cursed Energy</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+JP:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #080808;
+    --deep: #0d0d12;
+    --purple: #6b21f5;
+    --purple-dim: #3d1a8a;
+    --pink: #f520a0;
+    --cyan: #00e5ff;
+    --gold: #f0b429;
+    --red: #e8192c;
+    --white: #f0ede8;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Bebas Neue', sans-serif;
+    --serif: 'Noto Serif JP', serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--black); color: var(--white); font-family: var(--serif); overflow-x: hidden; cursor: crosshair; }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.35;
+  }
+
+  /* HERO */
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; padding: 4rem 2rem; }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 20% 50%, rgba(107,33,245,0.25) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 30%, rgba(245,32,160,0.15) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 50% at 50% 100%, rgba(232,25,44,0.1) 0%, transparent 50%), var(--deep);
+  }
+  .orb { position: absolute; border-radius: 50%; filter: blur(60px); animation: drift linear infinite; opacity: 0.15; pointer-events: none; }
+  .orb-1 { width: 300px; height: 300px; background: var(--purple); top: 10%; left: 5%; animation-duration: 20s; }
+  .orb-2 { width: 200px; height: 200px; background: var(--pink); top: 60%; right: 10%; animation-duration: 15s; animation-direction: reverse; }
+  .orb-3 { width: 150px; height: 150px; background: var(--cyan); bottom: 20%; left: 40%; animation-duration: 25s; opacity: 0.1; }
+  @keyframes drift {
+    0%,100% { transform: translate(0,0) rotate(0deg); }
+    25% { transform: translate(30px,-20px) rotate(90deg); }
+    50% { transform: translate(-20px,30px) rotate(180deg); }
+    75% { transform: translate(20px,10px) rotate(270deg); }
+  }
+  .cursed-lines { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .c-line { position: absolute; height: 1px; background: linear-gradient(90deg, transparent, var(--purple), transparent); animation: sweep 4s ease-in-out infinite; opacity: 0; }
+  .c-line:nth-child(1) { top:20%; width:60%; left:-10%; animation-delay:0s; }
+  .c-line:nth-child(2) { top:45%; width:40%; left:30%; animation-delay:1.2s; background:linear-gradient(90deg,transparent,var(--pink),transparent); }
+  .c-line:nth-child(3) { top:70%; width:55%; left:5%; animation-delay:2.4s; }
+  .c-line:nth-child(4) { top:85%; width:30%; left:60%; animation-delay:0.8s; background:linear-gradient(90deg,transparent,var(--cyan),transparent); }
+  .c-line:nth-child(5) { top:33%; width:45%; left:50%; animation-delay:3.1s; }
+  @keyframes sweep {
+    0% { opacity:0; transform:translateX(-20px) scaleX(0.8); }
+    30% { opacity:0.8; }
+    70% { opacity:0.6; }
+    100% { opacity:0; transform:translateX(40px) scaleX(1.1); }
+  }
+  .hero-eyebrow { font-family:var(--mono); font-size:0.75rem; letter-spacing:0.3em; color:var(--purple); text-transform:uppercase; margin-bottom:1.5rem; animation:fadeUp 0.8s ease forwards; opacity:0; }
+  .hero-title { font-family:var(--display); font-size:clamp(5rem,15vw,14rem); line-height:0.88; text-align:center; letter-spacing:0.02em; position:relative; z-index:2; animation:fadeUp 0.8s 0.2s ease forwards; opacity:0; }
+  .hero-title .line-1 { display:block; color:var(--white); }
+  .hero-title .line-2 { display:block; -webkit-text-stroke:2px var(--purple); color:transparent; position:relative; }
+  .hero-title .line-2::after { content:'KAISEN'; position:absolute; left:0; right:0; color:var(--purple); opacity:0; animation:glitch 5s 2s infinite; }
+  @keyframes glitch {
+    0%,95%,100% { opacity:0; transform:none; }
+    96% { opacity:0.8; transform:translate(-3px,1px); clip-path:inset(20% 0 60% 0); }
+    97% { opacity:0.6; transform:translate(3px,-2px); clip-path:inset(60% 0 10% 0); }
+    98% { opacity:0; }
+  }
+  .hero-sub { font-family:var(--mono); font-size:0.8rem; color:rgba(240,237,232,0.4); letter-spacing:0.2em; margin-top:2rem; text-align:center; animation:fadeUp 0.8s 0.5s ease forwards; opacity:0; }
+  .scroll-hint { position:absolute; bottom:2.5rem; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:0.5rem; font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:rgba(240,237,232,0.3); animation:fadeUp 1s 1.2s ease forwards; opacity:0; }
+  .scroll-hint span { display:block; width:1px; height:40px; background:linear-gradient(to bottom,var(--purple),transparent); animation:pulse-line 2s ease-in-out infinite; }
+  @keyframes pulse-line { 0%,100%{opacity:0.3;transform:scaleY(1);} 50%{opacity:1;transform:scaleY(1.1);} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+
+  /* QUOTE */
+  .quote-banner { padding:3rem 2rem; text-align:center; position:relative; overflow:hidden; background:linear-gradient(90deg,transparent,rgba(107,33,245,0.08),transparent); border-top:1px solid rgba(107,33,245,0.2); border-bottom:1px solid rgba(107,33,245,0.2); }
+  .quote-banner blockquote { font-family:var(--display); font-size:clamp(1.5rem,4vw,3rem); letter-spacing:0.04em; color:var(--white); max-width:900px; margin:0 auto 0.75rem; line-height:1.1; }
+  .quote-banner cite { font-family:var(--mono); font-size:0.7rem; letter-spacing:0.25em; color:var(--purple); font-style:normal; }
+
+  /* SECTIONS */
+  .section { padding:5rem 2rem; max-width:1200px; margin:0 auto; }
+  .section-label { font-family:var(--mono); font-size:0.65rem; letter-spacing:0.35em; color:var(--purple); text-transform:uppercase; margin-bottom:1rem; }
+  .section-title { font-family:var(--display); font-size:clamp(2.5rem,6vw,5rem); line-height:1; margin-bottom:3rem; }
+  .divider { display:flex; align-items:center; gap:1rem; padding:0 2rem; margin:2rem auto; max-width:1100px; }
+  .divider-line { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--purple-dim),transparent); }
+  .divider-text { font-family:var(--mono); font-size:0.65rem; letter-spacing:0.3em; color:var(--purple); text-transform:uppercase; white-space:nowrap; }
+
+  /* CHARACTER CARDS */
+  .characters-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.5rem; }
+  .char-card { position:relative; border:1px solid rgba(107,33,245,0.2); background:rgba(13,13,18,0.9); overflow:hidden; cursor:pointer; transition:border-color 0.3s ease, transform 0.3s ease; }
+  .char-card:hover { border-color:var(--accent,var(--purple)); transform:translateY(-6px); }
+
+  /* SVG CHARACTER ART PANEL */
+  .char-art {
+    width:100%; height:220px; position:relative; overflow:hidden;
+    background: var(--art-bg, #0d0d18);
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  .char-art svg { position:absolute; bottom:0; left:50%; transform:translateX(-50%); }
+  .char-art-glow {
+    position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+    width:160px; height:160px; border-radius:50%;
+    background:radial-gradient(circle, var(--accent,var(--purple)) 0%, transparent 70%);
+    opacity:0.18; filter:blur(20px);
+    transition: opacity 0.3s;
+  }
+  .char-card:hover .char-art-glow { opacity:0.35; }
+  .char-art-particles { position:absolute; inset:0; pointer-events:none; }
+  .particle {
+    position:absolute; width:2px; height:2px; border-radius:50%;
+    background:var(--accent,var(--purple));
+    animation:float-particle linear infinite;
+    opacity:0;
+  }
+  @keyframes float-particle {
+    0% { opacity:0; transform:translateY(0) scale(1); }
+    20% { opacity:0.8; }
+    80% { opacity:0.4; }
+    100% { opacity:0; transform:translateY(-120px) scale(0.3); }
+  }
+
+  .char-accent-bar { height:3px; background:var(--accent,var(--purple)); width:0; transition:width 0.4s ease; }
+  .char-card:hover .char-accent-bar { width:100%; }
+  .char-body { padding:1.5rem; }
+  .char-grade { font-family:var(--mono); font-size:0.6rem; letter-spacing:0.3em; color:var(--accent,var(--purple)); text-transform:uppercase; margin-bottom:0.4rem; }
+  .char-name { font-family:var(--display); font-size:2rem; line-height:1; margin-bottom:0.2rem; letter-spacing:0.04em; }
+  .char-jp { font-family:var(--serif); font-size:0.8rem; color:rgba(240,237,232,0.3); margin-bottom:0.9rem; }
+  .char-desc { font-family:var(--serif); font-size:0.82rem; line-height:1.7; color:rgba(240,237,232,0.6); margin-bottom:1.1rem; }
+  .char-technique { display:inline-block; font-family:var(--mono); font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; padding:0.3rem 0.75rem; border:1px solid var(--accent,var(--purple)); color:var(--accent,var(--purple)); }
+  .char-power-bar { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
+  .power-row { display:flex; align-items:center; gap:0.75rem; font-family:var(--mono); font-size:0.6rem; letter-spacing:0.1em; color:rgba(240,237,232,0.4); }
+  .power-row span:first-child { width:60px; flex-shrink:0; }
+  .power-track { flex:1; height:2px; background:rgba(255,255,255,0.07); position:relative; overflow:hidden; }
+  .power-fill { position:absolute; left:0; top:0; bottom:0; background:var(--accent,var(--purple)); transform:scaleX(0); transform-origin:left; transition:transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+  .char-card:hover .power-fill { transform:scaleX(1); }
+
+  /* DOMAINS */
+  .domains-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:rgba(107,33,245,0.15); border:1px solid rgba(107,33,245,0.15); }
+  @media(max-width:640px){ .domains-grid{grid-template-columns:1fr;} .characters-grid{grid-template-columns:1fr;} }
+  .domain-cell { background:var(--black); padding:2.5rem; position:relative; overflow:hidden; transition:background 0.3s; }
+  .domain-cell:hover { background:rgba(13,13,18,0.95); }
+  .domain-number { font-family:var(--display); font-size:5rem; line-height:1; color:rgba(107,33,245,0.08); position:absolute; right:1rem; top:0.5rem; pointer-events:none; transition:color 0.3s; }
+  .domain-cell:hover .domain-number { color:rgba(107,33,245,0.15); }
+  .domain-user { font-family:var(--mono); font-size:0.6rem; letter-spacing:0.25em; color:var(--purple); margin-bottom:0.75rem; text-transform:uppercase; }
+  .domain-name { font-family:var(--display); font-size:1.6rem; line-height:1.1; margin-bottom:0.75rem; letter-spacing:0.04em; }
+  .domain-desc { font-size:0.82rem; line-height:1.7; color:rgba(240,237,232,0.5); }
+
+  /* FOOTER */
+  footer { border-top:1px solid rgba(107,33,245,0.15); padding:3rem 2rem; text-align:center; }
+  .footer-logo { font-family:var(--display); font-size:3rem; letter-spacing:0.08em; color:var(--white); opacity:0.15; margin-bottom:1rem; }
+  .footer-text { font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:rgba(240,237,232,0.2); }
+  .footer-text a { color:var(--purple); text-decoration:none; }
+  .cursor-glow { position:fixed; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle,rgba(107,33,245,0.06) 0%,transparent 70%); pointer-events:none; transform:translate(-50%,-50%); z-index:1; transition:opacity 0.3s; }
+</style>
+</head>
+<body>
+
+<div class="cursor-glow" id="glow"></div>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+  <div class="cursed-lines">
+    <div class="c-line"></div><div class="c-line"></div><div class="c-line"></div><div class="c-line"></div><div class="c-line"></div>
+  </div>
+  <p class="hero-eyebrow">Cursed Energy // Tokyo Jujutsu High</p>
+  <h1 class="hero-title">
+    <span class="line-1">JUJUTSU</span>
+    <span class="line-2">KAISEN</span>
+  </h1>
+  <p class="hero-sub">呪術廻戦 &nbsp;·&nbsp; Sorcery Fight &nbsp;·&nbsp; 2018</p>
+  <div class="scroll-hint"><p>SCROLL</p><span></span></div>
+</section>
+
+<div class="quote-banner">
+  <blockquote>"I don't want to regret the way I lived."</blockquote>
+  <cite>— YUJI ITADORI</cite>
+</div>
+
+<section class="section">
+  <p class="section-label">// Sorcerers &amp; Vessels</p>
+  <h2 class="section-title">CURSED<br>USERS</h2>
+  <div class="characters-grid" id="chars"></div>
+</section>
+
+<div class="divider">
+  <div class="divider-line"></div>
+  <div class="divider-text">Domain Expansions</div>
+  <div class="divider-line"></div>
+</div>
+
+<section class="section" style="padding-top:0">
+  <p class="section-label">// Innate Domain</p>
+  <h2 class="section-title">BARRIER<br>TECHNIQUES</h2>
+  <div class="domains-grid">
+    <div class="domain-cell"><div class="domain-number">01</div><div class="domain-user">Gojo Satoru</div><div class="domain-name">UNLIMITED VOID</div><p class="domain-desc">Traps the target in infinite information, rendering them incapable of thought or action. The most refined domain ever recorded.</p></div>
+    <div class="domain-cell"><div class="domain-number">02</div><div class="domain-user">Ryomen Sukuna</div><div class="domain-name">MALEVOLENT SHRINE</div><p class="domain-desc">The only domain that does not require a barrier — it manifests in the real world, slashing everything within a 200-metre radius.</p></div>
+    <div class="domain-cell"><div class="domain-number">03</div><div class="domain-user">Megumi Fushiguro</div><div class="domain-name">CHIMERA SHADOW GARDEN</div><p class="domain-desc">Floods the domain with fluid shadows, summoning all shikigami simultaneously. An unfinished domain that still competes at the highest level.</p></div>
+    <div class="domain-cell"><div class="domain-number">04</div><div class="domain-user">Kento Nanami</div><div class="domain-name">COFFIN OF THE IRON MOUNTAIN</div><p class="domain-desc">Confines the target within a steel cube, forcing ratio-based weaknesses onto every surface — a tactical domain built for guaranteed hits.</p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">JJK</div>
+  <p class="footer-text">Fan tribute · Jujutsu Kaisen © Gege Akutami / Shueisha<br>Built with HTML + CSS · Deployed via <a href="#">nginx on Docker</a></p>
+</footer>
+
+<script>
+document.addEventListener('mousemove', e => {
+  const g = document.getElementById('glow');
+  g.style.left = e.clientX + 'px';
+  g.style.top = e.clientY + 'px';
+});
+
+// SVG silhouettes — each character has a unique stylised pose built from SVG paths
+const svgs = {
+  yuji: `<svg width="160" height="200" viewBox="0 0 160 200">
+    <!-- Body -->
+    <rect x="60" y="90" width="40" height="60" rx="4" fill="#c0000f" opacity="0.9"/>
+    <!-- Legs -->
+    <rect x="60" y="148" width="17" height="45" rx="3" fill="#1a1a2e"/>
+    <rect x="83" y="148" width="17" height="45" rx="3" fill="#1a1a2e"/>
+    <!-- Arms - fighting stance -->
+    <rect x="30" y="92" width="14" height="40" rx="4" fill="#c0000f" transform="rotate(-15 37 112)"/>
+    <rect x="116" y="88" width="14" height="40" rx="4" fill="#c0000f" transform="rotate(20 123 108)"/>
+    <!-- Fists -->
+    <circle cx="26" cy="132" r="10" fill="#d4956a"/>
+    <circle cx="134" cy="124" r="10" fill="#d4956a"/>
+    <!-- Head -->
+    <ellipse cx="80" cy="68" rx="24" ry="26" fill="#d4956a"/>
+    <!-- Hair - pink streaks -->
+    <ellipse cx="80" cy="46" rx="24" ry="14" fill="#2a1a3e"/>
+    <rect x="56" y="40" width="10" height="22" rx="5" fill="#2a1a3e"/>
+    <rect x="94" y="40" width="10" height="22" rx="5" fill="#2a1a3e"/>
+    <!-- Eyes -->
+    <ellipse cx="70" cy="68" rx="5" ry="4" fill="#1a0a0a"/>
+    <ellipse cx="90" cy="68" rx="5" ry="4" fill="#1a0a0a"/>
+    <circle cx="71" cy="67" r="1.5" fill="#fff"/>
+    <circle cx="91" cy="67" r="1.5" fill="#fff"/>
+    <!-- Tattoo marks on cheeks -->
+    <line x1="58" y1="72" x2="64" y2="70" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+    <line x1="96" y1="70" x2="102" y2="72" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+    <!-- Cursed energy aura -->
+    <ellipse cx="80" cy="130" rx="50" ry="55" fill="none" stroke="#e8192c" stroke-width="1" opacity="0.3" stroke-dasharray="4 6"/>
+    <ellipse cx="80" cy="130" rx="62" ry="68" fill="none" stroke="#e8192c" stroke-width="0.5" opacity="0.15" stroke-dasharray="2 8"/>
+  </svg>`,
+
+  gojo: `<svg width="160" height="200" viewBox="0 0 160 200">
+    <!-- Long coat -->
+    <path d="M48 95 L35 195 L60 195 L70 148 L90 148 L100 195 L125 195 L112 95 Z" fill="#f0ede8" opacity="0.92"/>
+    <!-- Body under coat -->
+    <rect x="58" y="90" width="44" height="55" rx="4" fill="#1a1a2e"/>
+    <!-- Arms outstretched -->
+    <rect x="10" y="94" width="50" height="13" rx="5" fill="#f0ede8"/>
+    <rect x="100" y="94" width="50" height="13" rx="5" fill="#f0ede8"/>
+    <!-- Hands -->
+    <ellipse cx="10" cy="100" rx="9" ry="8" fill="#d4956a"/>
+    <ellipse cx="150" cy="100" rx="9" ry="8" fill="#d4956a"/>
+    <!-- Head -->
+    <ellipse cx="80" cy="66" rx="24" ry="26" fill="#d4956a"/>
+    <!-- White hair -->
+    <ellipse cx="80" cy="44" rx="25" ry="15" fill="#f0ede8"/>
+    <rect x="55" y="38" width="11" height="20" rx="5" fill="#f0ede8"/>
+    <rect x="94" y="38" width="11" height="20" rx="5" fill="#f0ede8"/>
+    <!-- Blindfold -->
+    <rect x="54" y="60" width="52" height="14" rx="7" fill="#1a1a2e"/>
+    <rect x="54" y="60" width="52" height="14" rx="7" fill="none" stroke="#00e5ff" stroke-width="0.8" opacity="0.6"/>
+    <!-- Six eyes glow through blindfold -->
+    <ellipse cx="70" cy="67" rx="6" ry="4" fill="#00e5ff" opacity="0.4"/>
+    <ellipse cx="90" cy="67" rx="6" ry="4" fill="#00e5ff" opacity="0.4"/>
+    <!-- Infinity rings -->
+    <ellipse cx="80" cy="105" rx="58" ry="22" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.5" stroke-dasharray="3 4"/>
+    <ellipse cx="80" cy="105" rx="58" ry="22" fill="none" stroke="#00e5ff" stroke-width="0.5" opacity="0.25" transform="rotate(30 80 105)"/>
+    <ellipse cx="80" cy="105" rx="58" ry="22" fill="none" stroke="#00e5ff" stroke-width="0.5" opacity="0.2" transform="rotate(60 80 105)"/>
+    <!-- Limitless particles -->
+    <circle cx="25" cy="80" r="2" fill="#00e5ff" opacity="0.6"/>
+    <circle cx="135" cy="75" r="2" fill="#00e5ff" opacity="0.6"/>
+    <circle cx="20" cy="115" r="1.5" fill="#00e5ff" opacity="0.4"/>
+    <circle cx="140" cy="110" r="1.5" fill="#00e5ff" opacity="0.4"/>
+  </svg>`,
+
+  megumi: `<svg width="160" height="200" viewBox="0 0 160 200">
+    <!-- Dark uniform -->
+    <rect x="58" y="90" width="44" height="62" rx="4" fill="#1a1a2e"/>
+    <!-- Legs -->
+    <rect x="59" y="150" width="18" height="43" rx="3" fill="#0d0d18"/>
+    <rect x="83" y="150" width="18" height="43" rx="3" fill="#0d0d18"/>
+    <!-- Arms - summoning gesture, one arm raised -->
+    <rect x="30" y="88" width="30" height="12" rx="5" fill="#1a1a2e" transform="rotate(-40 45 94)"/>
+    <rect x="100" y="95" width="28" height="12" rx="5" fill="#1a1a2e"/>
+    <!-- Hand raised -->
+    <ellipse cx="22" cy="72" rx="9" ry="8" fill="#d4956a"/>
+    <ellipse cx="128" cy="100" rx="8" ry="7" fill="#d4956a"/>
+    <!-- Head -->
+    <ellipse cx="80" cy="66" rx="23" ry="25" fill="#d4956a"/>
+    <!-- Dark spiky hair -->
+    <ellipse cx="80" cy="45" rx="23" ry="13" fill="#1a1a2e"/>
+    <polygon points="60,52 55,30 65,48" fill="#1a1a2e"/>
+    <polygon points="72,44 68,22 76,42" fill="#1a1a2e"/>
+    <polygon points="84,43 82,21 90,42" fill="#1a1a2e"/>
+    <polygon points="95,48 94,28 102,46" fill="#1a1a2e"/>
+    <!-- Eyes - sharp -->
+    <ellipse cx="70" cy="66" rx="5" ry="4.5" fill="#0d1a3a"/>
+    <ellipse cx="90" cy="66" rx="5" ry="4.5" fill="#0d1a3a"/>
+    <circle cx="71" cy="65" r="1.5" fill="#4a6fa5"/>
+    <circle cx="91" cy="65" r="1.5" fill="#4a6fa5"/>
+    <!-- Shadow shikigami emerging below -->
+    <path d="M40 185 Q80 155 120 185 Q100 200 80 195 Q60 200 40 185Z" fill="#0d0d18" opacity="0.8"/>
+    <path d="M50 190 Q80 165 110 190" fill="none" stroke="#6b21f5" stroke-width="1" opacity="0.6"/>
+    <!-- Divine dog shadow forms -->
+    <ellipse cx="40" cy="182" rx="14" ry="9" fill="#1a1a2e" opacity="0.9"/>
+    <ellipse cx="36" cy="175" rx="6" ry="7" fill="#1a1a2e" opacity="0.9"/>
+    <ellipse cx="120" cy="182" rx="14" ry="9" fill="#1a1a2e" opacity="0.9"/>
+    <ellipse cx="124" cy="175" rx="6" ry="7" fill="#1a1a2e" opacity="0.9"/>
+    <circle cx="33" cy="173" r="2" fill="#6b21f5" opacity="0.8"/>
+    <circle cx="123" cy="173" r="2" fill="#6b21f5" opacity="0.8"/>
+  </svg>`,
+
+  nobara: `<svg width="160" height="200" viewBox="0 0 160 200">
+    <!-- Uniform skirt -->
+    <rect x="58" y="90" width="44" height="45" rx="4" fill="#1a1a2e"/>
+    <path d="M52 132 L58 185 L78 185 L80 148 L82 185 L102 185 L108 132 Z" fill="#1a1a2e"/>
+    <!-- Belt -->
+    <rect x="56" y="128" width="48" height="7" rx="2" fill="#c8a830"/>
+    <!-- Arms - one holding hammer up -->
+    <rect x="100" y="82" width="12" height="38" rx="5" fill="#1a1a2e" transform="rotate(15 106 101)"/>
+    <rect x="30" y="96" width="30" height="12" rx="5" fill="#1a1a2e"/>
+    <!-- Hammer held up -->
+    <rect x="118" y="38" width="8" height="50" rx="3" fill="#8B7355"/>
+    <rect x="108" y="32" width="28" height="16" rx="4" fill="#5a4a3a"/>
+    <!-- Nails around (cursed tools) -->
+    <line x1="18" y1="88" x2="26" y2="105" stroke="#c8a830" stroke-width="3" stroke-linecap="round"/>
+    <line x1="22" y1="85" x2="28" y2="100" stroke="#c8a830" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Hand -->
+    <ellipse cx="28" cy="101" rx="9" ry="8" fill="#d4956a"/>
+    <!-- Head -->
+    <ellipse cx="80" cy="64" rx="23" ry="25" fill="#d4956a"/>
+    <!-- Auburn hair bun -->
+    <ellipse cx="80" cy="43" rx="22" ry="13" fill="#8B3a1a"/>
+    <circle cx="80" cy="34" r="11" fill="#8B3a1a"/>
+    <ellipse cx="58" cy="62" rx="8" ry="18" fill="#8B3a1a"/>
+    <ellipse cx="102" cy="62" rx="8" ry="18" fill="#8B3a1a"/>
+    <!-- Eyes - fierce -->
+    <ellipse cx="70" cy="65" rx="5" ry="4" fill="#3a1a0a"/>
+    <ellipse cx="90" cy="65" rx="5" ry="4" fill="#3a1a0a"/>
+    <circle cx="71" cy="64" r="1.5" fill="#c8a830"/>
+    <circle cx="91" cy="64" r="1.5" fill="#c8a830"/>
+    <!-- Cursed straw doll energy -->
+    <circle cx="80" cy="115" r="28" fill="none" stroke="#f0b429" stroke-width="0.8" opacity="0.3" stroke-dasharray="3 5"/>
+  </svg>`,
+
+  sukuna: `<svg width="160" height="200" viewBox="0 0 160 200">
+    <!-- Ornate robes -->
+    <path d="M45 92 L30 195 L65 195 L72 145 L88 145 L95 195 L130 195 L115 92 Z" fill="#1a0a14" opacity="0.95"/>
+    <!-- Robe patterns -->
+    <path d="M50 110 L45 130" stroke="#f520a0" stroke-width="1" opacity="0.5"/>
+    <path d="M110 110 L115 130" stroke="#f520a0" stroke-width="1" opacity="0.5"/>
+    <!-- Four arms -->
+    <rect x="8" y="88" width="40" height="13" rx="5" fill="#1a0a14"/>
+    <rect x="112" y="88" width="40" height="13" rx="5" fill="#1a0a14"/>
+    <rect x="5" y="108" width="38" height="11" rx="5" fill="#c8956a" transform="rotate(10 24 113)"/>
+    <rect x="117" y="108" width="38" height="11" rx="5" fill="#c8956a" transform="rotate(-10 136 113)"/>
+    <!-- Four hands -->
+    <ellipse cx="8" cy="94" rx="9" ry="8" fill="#c8956a"/>
+    <ellipse cx="152" cy="94" rx="9" ry="8" fill="#c8956a"/>
+    <ellipse cx="6" cy="116" rx="8" ry="7" fill="#c8956a"/>
+    <ellipse cx="154" cy="116" rx="8" ry="7" fill="#c8956a"/>
+    <!-- Head -->
+    <ellipse cx="80" cy="62" rx="25" ry="27" fill="#c8956a"/>
+    <!-- Long white hair -->
+    <rect x="55" y="40" width="50" height="40" rx="8" fill="#f0ede8"/>
+    <rect x="48" y="50" width="14" height="80" rx="6" fill="#f0ede8"/>
+    <rect x="98" y="50" width="14" height="80" rx="6" fill="#f0ede8"/>
+    <ellipse cx="80" cy="42" rx="26" ry="12" fill="#f0ede8"/>
+    <!-- Tattoo markings on face -->
+    <path d="M56 58 Q58 62 56 66" stroke="#8B0000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M104 58 Q102 62 104 66" stroke="#8B0000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <line x1="62" y1="75" x2="75" y2="72" stroke="#8B0000" stroke-width="1.5"/>
+    <line x1="85" y1="72" x2="98" y2="75" stroke="#8B0000" stroke-width="1.5"/>
+    <!-- Eyes - four total, two normal two extra -->
+    <ellipse cx="70" cy="61" rx="6" ry="5" fill="#1a0008"/>
+    <ellipse cx="90" cy="61" rx="6" ry="5" fill="#1a0008"/>
+    <circle cx="70" cy="60" r="2" fill="#ff0040"/>
+    <circle cx="90" cy="60" r="2" fill="#ff0040"/>
+    <!-- Extra eyes on forehead -->
+    <ellipse cx="70" cy="48" rx="4" ry="3" fill="#1a0008" opacity="0.7"/>
+    <ellipse cx="90" cy="48" rx="4" ry="3" fill="#1a0008" opacity="0.7"/>
+    <circle cx="70" cy="47" r="1.2" fill="#ff0040" opacity="0.7"/>
+    <circle cx="90" cy="47" r="1.2" fill="#ff0040" opacity="0.7"/>
+    <!-- Malevolent shrine energy slashes -->
+    <line x1="10" y1="160" x2="150" y2="140" stroke="#f520a0" stroke-width="1" opacity="0.4"/>
+    <line x1="5" y1="175" x2="155" y2="155" stroke="#f520a0" stroke-width="0.8" opacity="0.25"/>
+    <line x1="20" y1="190" x2="145" y2="170" stroke="#f520a0" stroke-width="0.6" opacity="0.2"/>
+  </svg>`,
+
+  nanami: `<svg width="160" height="200" viewBox="0 0 160 200">
+    <!-- Suit jacket -->
+    <rect x="56" y="88" width="48" height="65" rx="4" fill="#3a3420"/>
+    <!-- Suit lapels -->
+    <polygon points="80,90 62,88 68,115" fill="#2a2614"/>
+    <polygon points="80,90 98,88 92,115" fill="#2a2614"/>
+    <!-- Tie -->
+    <polygon points="80,92 76,95 78,125 80,128 82,125 84,95" fill="#8B1a1a"/>
+    <!-- Legs - trousers -->
+    <rect x="58" y="151" width="18" height="42" rx="3" fill="#2a2614"/>
+    <rect x="84" y="151" width="18" height="42" rx="3" fill="#2a2614"/>
+    <!-- Arms - one raised with bandaged hand -->
+    <rect x="24" y="90" width="34" height="13" rx="5" fill="#3a3420" transform="rotate(-20 41 96)"/>
+    <rect x="102" y="92" width="32" height="13" rx="5" fill="#3a3420"/>
+    <!-- Bandaged forearm -->
+    <rect x="20" y="70" width="14" height="26" rx="4" fill="#e8e0d0"/>
+    <line x1="20" y1="75" x2="34" y2="75" stroke="#d4c8b8" stroke-width="1"/>
+    <line x1="20" y1="80" x2="34" y2="80" stroke="#d4c8b8" stroke-width="1"/>
+    <line x1="20" y1="85" x2="34" y2="85" stroke="#d4c8b8" stroke-width="1"/>
+    <!-- Hand -->
+    <ellipse cx="134" cy="98" rx="9" ry="8" fill="#c8956a"/>
+    <!-- Head - square jaw -->
+    <rect x="57" y="42" width="46" height="48" rx="10" fill="#c8956a"/>
+    <!-- Short blonde hair -->
+    <rect x="57" y="38" width="46" height="16" rx="8" fill="#c8a830"/>
+    <rect x="57" y="42" width="10" height="20" rx="5" fill="#c8a830"/>
+    <!-- Glasses -->
+    <rect x="58" y="60" width="20" height="14" rx="4" fill="none" stroke="#888" stroke-width="1.5"/>
+    <rect x="82" y="60" width="20" height="14" rx="4" fill="none" stroke="#888" stroke-width="1.5"/>
+    <line x1="78" y1="66" x2="82" y2="66" stroke="#888" stroke-width="1.5"/>
+    <!-- Eyes behind glasses -->
+    <ellipse cx="68" cy="67" rx="4" ry="3.5" fill="#2a1a0a"/>
+    <ellipse cx="92" cy="67" rx="4" ry="3.5" fill="#2a1a0a"/>
+    <!-- Ratio lines - 7:3 marks on environment -->
+    <line x1="15" y1="150" x2="145" y2="150" stroke="#d4a843" stroke-width="0.8" opacity="0.3"/>
+    <circle cx="57" cy="150" r="2.5" fill="#d4a843" opacity="0.5"/>
+    <line x1="15" y1="165" x2="145" y2="165" stroke="#d4a843" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="57" cy="165" r="2" fill="#d4a843" opacity="0.3"/>
+  </svg>`
+};
+
+const artBgs = {
+  yuji: '#1a0505', gojo: '#050d1a', megumi: '#08081a',
+  nobara: '#1a1205', sukuna: '#1a0510', nanami: '#0f0e05'
+};
+
+const characters = [
+  { id:'yuji', name:"YUJI ITADORI", jp:"虎杖悠仁", grade:"Grade 1 Sorcerer", accent:"#e8192c", technique:"Divergent Fist / Black Flash", desc:"A high-school student with extraordinary physical ability who becomes the vessel for Ryomen Sukuna. Fights to ensure everyone dies surrounded by others.", powers:[{label:"Strength",val:0.95},{label:"Speed",val:0.90},{label:"Cursed",val:0.70}] },
+  { id:'gojo', name:"SATORU GOJO", jp:"五条悟", grade:"Special Grade", accent:"#00e5ff", technique:"Limitless / Six Eyes", desc:"The strongest sorcerer alive. His Six Eyes and Limitless technique render virtually all attacks null. Believes in reforming jujutsu society from within.", powers:[{label:"Strength",val:1.0},{label:"Speed",val:1.0},{label:"Cursed",val:1.0}] },
+  { id:'megumi', name:"MEGUMI FUSHIGURO", jp:"伏黒恵", grade:"Grade 2 Sorcerer", accent:"#6b21f5", technique:"Ten Shadows Technique", desc:"A stoic sorcerer of the Zenin lineage who summons shikigami from shadows. The potential Sukuna sees in him drives the entire series forward.", powers:[{label:"Strength",val:0.72},{label:"Speed",val:0.78},{label:"Cursed",val:0.85}] },
+  { id:'nobara', name:"NOBARA KUGISAKI", jp:"釘崎野薔薇", grade:"Grade 3 Sorcerer", accent:"#f0b429", technique:"Straw Doll / Resonance", desc:"A rural girl with iron confidence who wields hammer and nails as cursed tools. Her Resonance deals damage through any part of a target's body.", powers:[{label:"Strength",val:0.68},{label:"Speed",val:0.72},{label:"Cursed",val:0.75}] },
+  { id:'sukuna', name:"RYOMEN SUKUNA", jp:"両面宿儺", grade:"Special Grade Cursed Spirit", accent:"#f520a0", technique:"Cleave / Dismantle / Flame Arrow", desc:"The King of Curses. A legendary sorcerer reborn across 20 cursed fingers. His Malevolent Shrine needs no barrier — the real world becomes his killing field.", powers:[{label:"Strength",val:1.0},{label:"Speed",val:1.0},{label:"Cursed",val:1.0}] },
+  { id:'nanami', name:"KENTO NANAMI", jp:"七海建人", grade:"Grade 1 Sorcerer", accent:"#d4a843", technique:"Ratio Technique / Overtime", desc:"A former salaryman who returned to sorcery. Methodical and precise, his Ratio Technique creates a mandatory weak point on any target.", powers:[{label:"Strength",val:0.82},{label:"Speed",val:0.78},{label:"Cursed",val:0.80}] },
+];
+
+const grid = document.getElementById('chars');
+
+characters.forEach(c => {
+  const card = document.createElement('div');
+  card.className = 'char-card';
+  card.style.setProperty('--accent', c.accent);
+
+  // Particles
+  const particleHTML = Array.from({length:8}, (_,i) => {
+    const left = 15 + Math.random()*70;
+    const delay = Math.random()*3;
+    const dur = 2 + Math.random()*2;
+    return `<div class="particle" style="left:${left}%;bottom:0;animation-duration:${dur}s;animation-delay:${delay}s;background:${c.accent}"></div>`;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="char-art" style="--art-bg:${artBgs[c.id]}; background:${artBgs[c.id]}">
+      <div class="char-art-glow" style="background:radial-gradient(circle,${c.accent} 0%,transparent 70%)"></div>
+      <div class="char-art-particles">${particleHTML}</div>
+      ${svgs[c.id]}
+    </div>
+    <div class="char-accent-bar"></div>
+    <div class="char-body">
+      <div class="char-grade">${c.grade}</div>
+      <div class="char-name">${c.name}</div>
+      <div class="char-jp">${c.jp}</div>
+      <p class="char-desc">${c.desc}</p>
+      <div class="char-technique">${c.technique}</div>
+      <div class="char-power-bar">
+        ${c.powers.map(p=>`
+          <div class="power-row">
+            <span>${p.label}</span>
+            <div class="power-track"><div class="power-fill" style="width:${p.val*100}%"></div></div>
+            <span>${Math.round(p.val*100)}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>
