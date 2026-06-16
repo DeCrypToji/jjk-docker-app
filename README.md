@@ -370,7 +370,7 @@ My background in physical network infrastructure brings real-world understanding
 
 **DeCrypToji** — transitioning from network infrastructure into DevSecOps
 - GitHub: [@DeCrypToji](https://github.com/DeCrypToji)
-- LinkedIn: [Your LinkedIn URL](https://linkedin.com)
+- LinkedIn: https://www.linkedin.com/in/janali-miller-reid-0835101a2/
 
 ---
 
