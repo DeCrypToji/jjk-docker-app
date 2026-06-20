@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jjk-deployment
+  labels:
+    app: jjk
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: jjk
+  template:
+    metadata:
+      labels:
+        app: jjk
+    spec:
+      containers:
+      - name: jjk-container
+        image: jjk-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jjk-service
+spec:
+  selector:
+    app: jjk
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30080
