@@ -1,377 +1,245 @@
-# JJK Docker App 🔵
-> A Jujutsu Kaisen fan tribute site containerised with Docker and nginx, with a full DevSecOps CI/CD pipeline and live deployment to AWS ECS Fargate — built as part of my transition from network infrastructure into cloud engineering.
+# JJK Docker App
+
+> A Jujutsu Kaisen fan tribute site deployed end to end via a full DevSecOps pipeline — containerised with Docker, secured with Trivy and Hadolint, infrastructure provisioned with Terraform, served over HTTPS on a custom domain, and orchestrated with Kubernetes on both local minikube and AWS EKS.
 
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
-![nginx](https://img.shields.io/badge/nginx-009639?style=flat&logo=nginx&logoColor=white)
-![AWS ECR](https://img.shields.io/badge/AWS%20ECR-FF9900?style=flat&logo=amazonaws&logoColor=white)
 ![AWS ECS](https://img.shields.io/badge/AWS%20ECS-FF9900?style=flat&logo=amazonaws&logoColor=white)
+![AWS EKS](https://img.shields.io/badge/AWS%20EKS-FF9900?style=flat&logo=amazonaws&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=flat&logo=kubernetes&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
 ![Trivy](https://img.shields.io/badge/Trivy-1904DA?style=flat&logo=aquasecurity&logoColor=white)
-![Hadolint](https://img.shields.io/badge/Hadolint-000000?style=flat&logo=docker&logoColor=white)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
+![HTTPS](https://img.shields.io/badge/HTTPS-secured-green?style=flat)
+
+**Live:** https://jjk.decryptoji.com
 
 ---
 
-## What this project does
-
-A fully static, single-file web app themed around the anime Jujutsu Kaisen. Features six character cards with hand-crafted SVG silhouettes, animated cursed energy effects, domain expansion breakdowns, and responsive layout — all served via nginx inside a Docker container.
-
-Every commit to `main` automatically triggers a GitHub Actions pipeline that lints the Dockerfile, builds the image, scans for vulnerabilities, and pushes a uniquely versioned image to AWS ECR. The image is then deployed and served publicly via AWS ECS Fargate — no manual intervention required after the initial push.
-
----
-
-## Full architecture
+## Architecture
 
 ```
-Developer pushes code to GitHub (main branch)
-                │
-                ▼
-    ┌───────────────────────┐
-    │   GitHub Actions      │
-    │   Ubuntu Runner       │
-    └───────────────────────┘
-                │
-                ▼
-    ┌───────────────────────┐
-    │  Checkout code        │  Pulls repo onto runner
-    └───────────────────────┘
-                │
-                ▼
-    ┌───────────────────────┐
-    │  Configure AWS        │  Authenticates via IAM
-    │  credentials          │  using GitHub secrets
-    └───────────────────────┘
-                │
-                ▼
-    ┌───────────────────────┐
-    │  Login to ECR         │  Docker authenticated
-    └───────────────────────┘
-                │
-                ▼
-    ┌───────────────────────┐
-    │  Hadolint             │  Lints Dockerfile against
-    │  Dockerfile lint      │  Docker best practices
-    └───────────────────────┘  and CIS Docker Benchmark
-                │
-          FAIL ─┤─ PASS
-                │
-                ▼
-    ┌───────────────────────┐
-    │  Docker build         │  Builds image tagged with
-    │                       │  unique git commit SHA
-    └───────────────────────┘
-                │
-                ▼
-    ┌───────────────────────┐
-    │  Trivy CVE scan       │  Scans image for known
-    │  (security gate)      │  vulnerabilities
-    └───────────────────────┘
-                │
-          FAIL ─┤─ PASS
-    (CRITICAL   │
-     CVEs found)│
-                ▼
-    ┌───────────────────────┐
-    │  Push to AWS ECR      │  Image stored with SHA tag
-    │                       │  for full version control
-    └───────────────────────┘
-                │
-                ▼
-    ┌─────────────────────────────────────┐
-    │         AWS ECS Fargate             │
-    │                                     │
-    │  Cluster: jjk-cluster               │
-    │  Service: jjk-service               │
-    │  Task:    jjk-task                  │
-    │                                     │
-    │  Pulls image from ECR               │
-    │  Runs nginx container               │
-    │  Exposes port 80 publicly           │
-    │  Auto-restarts if container crashes │
-    └─────────────────────────────────────┘
-                │
-                ▼
-         Public internet 🌍
+Git push → GitHub Actions → Hadolint → Docker build → Trivy scan → ECR push
+                                                                        │
+                                                              ┌─────────┴──────────┐
+                                                              │                    │
+                                                         ECS Fargate            AWS EKS
+                                                         (Terraform)          (eksctl/kubectl)
+                                                              │                    │
+                                                    Route53 → ALB → ACM    LoadBalancer Service
+                                                              │                    │
+                                                         ECS Task            K8s Pods (x2)
+                                                         (nginx)              (nginx)
 ```
 
 ---
 
-## AWS infrastructure
+## CI/CD Pipeline
 
-| Resource | Name | Purpose |
+Every push to `main` triggers the following stages in order:
+
+| Stage | Tool | Purpose |
 |---|---|---|
-| ECR Repository | `jjk-docker-app` | Stores versioned Docker images |
-| ECS Cluster | `jjk-cluster` | Logical grouping of Fargate resources |
-| Task Definition | `jjk-task` | Blueprint — defines image, CPU, memory, ports |
-| ECS Service | `jjk-service` | Ensures task stays running, handles restarts |
-| Security Group | `jjk-sg` | Allows inbound HTTP on port 80 from anywhere |
-| IAM Role | `ecsTaskExecutionRole` | Allows ECS to pull from ECR and write logs |
-| VPC | Default VPC | Network boundary — public subnets used |
-| ECR Lifecycle Policy | Keep last 10 | Automatically expires old images to control cost |
+| Lint | Hadolint | Validates Dockerfile against Docker best practices and CIS benchmark |
+| Build | Docker | Builds image tagged with git commit SHA — no `latest` overwriting |
+| Scan | Trivy | Blocks push on CRITICAL CVEs — shift-left security gate |
+| Push | AWS ECR | Stores versioned image — lifecycle policy retains last 10 |
 
 ---
 
-## Technologies used
+## Infrastructure (Terraform)
 
-| Tool | Purpose |
-|---|---|
-| HTML5 / CSS3 / JavaScript | Static web app — single file, no frameworks |
-| SVG | Hand-crafted character illustrations, no external images |
-| Docker | Containerising the app with nginx:alpine base image |
-| nginx | Serving the static site inside the container |
-| GitHub Actions | CI/CD pipeline — automated lint, build, scan and push |
-| Hadolint | Dockerfile static analysis — best practices and CIS benchmark |
-| Trivy | Container image CVE scanning — shift-left security gate |
-| AWS ECR | Storing and versioning Docker images in the cloud |
-| AWS ECS Fargate | Serverless container orchestration — runs and manages containers |
-| AWS IAM | Least privilege access — dedicated user with scoped permissions |
-| AWS VPC | Network isolation — public subnets for container access |
-| ECR Lifecycle Policy | Automated image retention management |
-| AWS CLI | Infrastructure management from the terminal |
-| Ubuntu (VirtualBox VM) | Development environment |
-
----
-
-## Project structure
-
-```
-jjk-docker-app/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # GitHub Actions CI/CD pipeline
-├── .trivyignore                # Documented CVE risk acceptances
-├── index.html                  # Complete site — HTML, CSS, JS, SVG
-├── Dockerfile                  # Container build instructions
-└── README.md
-```
-
----
-
-## Dockerfile
-
-```dockerfile
-FROM nginx:1.27-alpine
-RUN apk update && apk upgrade openssl libexpat
-COPY index.html /usr/share/nginx/html/index.html
-RUN chmod 644 /usr/share/nginx/html/index.html
-EXPOSE 80
-```
-
-**Dockerfile decisions explained:**
-- `nginx:1.27-alpine` — pinned to a specific version for reproducibility. Alpine used over full Debian/Ubuntu for minimal attack surface (~5MB vs ~200MB)
-- `apk upgrade openssl libexpat` — explicitly patches known CVEs during build rather than relying on base image to be current
-- `chmod 644` — least privilege applied. nginx requires read access only, not write or execute
-
----
-
-## CI/CD Pipeline — deploy.yml
-
-```yaml
-name: Build and Push to ECR
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Lint Dockerfile with Hadolint
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: Dockerfile
-
-      - name: Build image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: jjk-docker-app
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-
-      - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ steps.login-ecr.outputs.registry }}/jjk-docker-app:${{ github.sha }}
-          format: table
-          exit-code: 1
-          severity: CRITICAL
-
-      - name: Push image to ECR
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: jjk-docker-app
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-```
-
----
-
-## ECS Fargate deployment
-
-**Why Fargate over EC2:**
-Fargate is serverless — AWS manages the underlying infrastructure, OS patching and scaling. This removes operational overhead and allows focus on the application and pipeline rather than server management. EC2 will be introduced in project 2 for workloads requiring more granular control.
-
-**ECS concepts explained:**
-
-```
-Cluster — the logical boundary housing all ECS resources
-    │
-Task Definition — blueprint defining image, CPU, memory, ports, IAM role
-    │
-Task — the running instance of the task definition (the actual container)
-    │
-Service — ensures the desired number of tasks are always running
-          auto-restarts crashed tasks, handles rolling deployments
-```
-
-**Networking:**
-- Deployed into default VPC public subnets
-- Security group `jjk-sg` allows inbound HTTP port 80 from `0.0.0.0/0`
-- Public IP assigned to task for internet accessibility
-- In production: private subnets with ALB in front, HTTPS via ACM
-
----
-
-## Key pipeline decisions
-
-**Why Hadolint runs before the build:**
-Validating the Dockerfile before building avoids wasting compute time on a non-compliant image. Shift-left applied to infrastructure code.
-
-**Why Trivy runs before the push:**
-A vulnerable image should never reach the registry. CRITICAL CVEs block the pipeline before the image is stored.
-
-**Why SHA tagging instead of `latest`:**
-Every image is uniquely versioned and traceable back to the exact commit. Essential for rollbacks and Kubernetes rolling updates in production.
-
-**Why Fargate:**
-Serverless — no EC2 instance management, OS patching or capacity planning. AWS handles the infrastructure, the pipeline handles the delivery.
-
-**Why a dedicated IAM user:**
-Root access keys are a critical security risk. Least privilege applied — the IAM user has only the permissions required for ECR and ECS operations.
-
----
-
-## Security principles applied
-
-| Principle | How it was applied |
-|---|---|
-| Shift-left security | Hadolint and Trivy run before build and push respectively |
-| Least privilege | Dedicated IAM user, scoped policies, `chmod 644` on files |
-| No hardcoded credentials | AWS keys stored as GitHub Actions encrypted secrets |
-| Image immutability | SHA tagging — every image uniquely versioned and traceable |
-| Cost and hygiene control | ECR lifecycle policy — keeps last 10 images only |
-| Risk-based CVE management | CRITICAL CVEs patched where possible, documented where not |
-| Minimal attack surface | Alpine Linux base image, explicit package upgrades |
-| Network segmentation | Security group restricts inbound to port 80 only |
-
----
-
-## Security — CVE handling
-
-| CVE | Severity | Description | Resolution |
-|---|---|---|---|
-| CVE-2024-45491 | CRITICAL | libexpat integer overflow — potential arbitrary code execution (CVSS 9.8) | Patched via `apk upgrade libexpat` |
-| CVE-2026-31789 | CRITICAL | OpenSSL heap buffer overflow on 32-bit systems | Patched via `apk upgrade openssl` |
-| Various libexpat | CRITICAL | Additional libexpat CVEs with no upstream patch at time of build | Added to `.trivyignore` with documented risk acceptance |
-
----
-
-## Problems encountered and resolved
-
-**Issue 1 — Default nginx page showing**
-Root cause: File not named `index.html`. Fix: matched filename in Dockerfile `COPY` command.
-
-**Issue 2 — 403 Forbidden**
-Root cause: Permissions `-rwxrwx---`, nginx as `others` had no read access. Fix: `chmod 644` in Dockerfile.
-
-**Issue 3 — Blank page**
-Root cause: File wiped when exec-ing into running container. Fix: baked `chmod` into Dockerfile via `RUN`.
-
-**Issue 4 — ECR push authorization failure**
-Root cause: `sudo docker push` ran as root, credentials saved to normal user. Fix: added user to docker group, chained login and push with `&&`.
-
-**Issue 5 — ECR repository does not exist**
-Fix: `aws ecr create-repository` before pushing.
-
-**Issue 6 — GitHub Actions credential mismatch**
-Root cause: Outdated root keys in GitHub secrets after rotating to IAM user. Fix: updated secrets.
-
-**Issue 7 — Trivy blocking on CRITICAL CVEs**
-Root cause: Base image vulnerabilities in OpenSSL and libexpat. Fix: pinned nginx version, explicit package upgrades, `.trivyignore` for unpatched CVEs.
-
-**Issue 8 — ECS task failing to pull image**
-Root cause: `ecsTaskExecutionRole` needed to be attached to task definition to grant ECR pull permissions. Fix: selected existing execution role in task definition configuration.
-
----
-
-## How to run locally
+All AWS resources provisioned as code — single command to build or destroy:
 
 ```bash
-git clone https://github.com/DeCrypToji/jjk-docker-app.git
-cd jjk-docker-app
-docker build -t jjk-app .
-docker run -p 8080:80 jjk-app
+terraform apply -var="ecr_image_uri=<ecr-uri>:<sha>"
+terraform destroy
 ```
 
-Open `http://localhost:8080`
+| Resource | Purpose |
+|---|---|
+| ECS Cluster | Logical grouping of Fargate resources |
+| Task Definition | Container blueprint — image, CPU (256), memory (512MB), port 80 |
+| ECS Service | Maintains desired task count, registers tasks into ALB target group |
+| ALB | Receives traffic, terminates TLS, forwards to healthy tasks |
+| Target Group | Health checks tasks every 30s, routes ALB traffic to healthy containers |
+| HTTP Listener | Permanent 301 redirect — HTTP → HTTPS |
+| HTTPS Listener | TLS termination via ACM certificate, forwards to target group |
+| ACM Certificate | SSL/TLS for `jjk.decryptoji.com` — DNS validated via Route53 |
+| Route53 A Record | Alias record pointing `jjk.decryptoji.com` to ALB |
+| Security Group | Inbound ports 80 + 443 only — least privilege network access |
+| ECR Lifecycle Policy | Retains last 10 images — cost and hygiene control |
 
 ---
 
-## Cost management
+## Kubernetes
 
-- ECS Fargate tasks incur charges while running — stop the service when not in use
-- Set desired task count to `0` in the ECS service to stop without deleting infrastructure
-- ECR lifecycle policy keeps storage costs minimal — last 10 images retained only
-- AWS billing alert set at $10 to catch unexpected charges early
-- Next iteration will provision all infrastructure via Terraform enabling single command teardown
+The app was deployed to Kubernetes in two environments — local and cloud.
+
+### Local (minikube)
+
+```bash
+minikube start --driver=docker
+eval $(minikube docker-env)
+docker build -t jjk-app:latest .
+kubectl apply -f k8s-deployment.yaml
+minikube service jjk-service --url
+```
+
+**Concepts validated locally:**
+- Pod scheduling and self-healing — deleted pods replaced automatically
+- Replica scaling — `kubectl scale deployment jjk-deployment --replicas=10` instant
+- Rolling updates — zero downtime on config changes
+- Namespaces — isolated `jjk-dev` environment alongside `default`
+- Real time logging — `kubectl logs <pod> -f`
+
+### Cloud (AWS EKS)
+
+```bash
+eksctl create cluster \
+  --name jjk-cluster \
+  --region eu-central-1 \
+  --nodegroup-name jjk-nodes \
+  --node-type t3.small \
+  --nodes 2 \
+  --managed
+
+kubectl apply -f k8s-deployment.yaml
+kubectl get service jjk-service
+```
+
+- 2 worker nodes (t3.small EC2) managed by AWS
+- Image pulled directly from ECR via node IAM role
+- Publicly exposed via AWS LoadBalancer service
+- Same `kubectl` commands as minikube — zero context switching
+
+### k8s-deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jjk-deployment
+  labels:
+    app: jjk
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: jjk
+  template:
+    metadata:
+      labels:
+        app: jjk
+    spec:
+      containers:
+      - name: jjk-container
+        image: 119750096239.dkr.ecr.eu-central-1.amazonaws.com/jjk-docker-app:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jjk-service
+spec:
+  selector:
+    app: jjk
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+```
 
 ---
 
-## Background
+## Security
 
-Built as part of my transition from FTTP installation engineering into DevSecOps and cloud engineering. I hold CompTIA A+ and Security+ certifications and am currently working toward AWS Cloud Practitioner.
-
-My background in physical network infrastructure brings real-world understanding of uptime pressure, fault diagnosis under stress, and compliance frameworks — applied here through security-first decision making at every stage of the pipeline.
-
----
-
-## What's next
-
-- [ ] Provision all infrastructure with Terraform — full IaC teardown and rebuild
-- [ ] Add HTTPS via ALB and AWS Certificate Manager
-- [ ] Add Route53 custom domain
-- [ ] Add DAST scanning to pipeline
-- [ ] Kubernetes deployment on AWS EKS
-- [ ] AWS Cloud Practitioner certification
-- [ ] Project 2 — enterprise-grade production environment with multi-environment pipeline, Kubernetes, Prometheus/Grafana monitoring, ArgoCD GitOps, Ansible and a backend API with database
+- **Shift-left** — Hadolint and Trivy gate the pipeline before any image reaches ECR
+- **Least privilege** — dedicated IAM user, `ecsTaskExecutionRole` for task pulls, `AmazonEC2ContainerRegistryReadOnly` for EKS nodes
+- **No hardcoded credentials** — AWS keys stored as GitHub Actions encrypted secrets
+- **Image versioning** — SHA tagging ensures every build is uniquely traceable and rollback-ready
+- **HTTPS enforced** — HTTP redirects to HTTPS via ALB, TLS terminated with ACM certificate
+- **Minimal attack surface** — nginx:alpine base image, explicit OpenSSL and libexpat patches
+- **Network isolation** — security group restricts inbound to ports 80 and 443 only
 
 ---
 
-## Author
+## CVE Handling
+
+| CVE | Severity | Resolution |
+|---|---|---|
+| CVE-2024-45491 | CRITICAL | Patched — `apk upgrade libexpat` in Dockerfile |
+| CVE-2026-31789 | CRITICAL | Patched — `apk upgrade openssl` in Dockerfile |
+| Various libexpat | CRITICAL | No upstream patch available — documented in `.trivyignore` with risk acceptance |
+
+---
+
+## Key Debugging
+
+| Issue | Root Cause | Resolution |
+|---|---|---|
+| 403 Forbidden | nginx running as `others`, file permissions `-rwxrwx---` | `chmod 644` in Dockerfile |
+| Blank page | File wiped when exec-ing into running container | Baked fix into Dockerfile via `RUN` |
+| ECR auth failure | `sudo docker push` ran as root, credentials on user | Added user to docker group, chained login and push with `&&` |
+| Trivy blocking pipeline | CVEs in base nginx:alpine | Pinned to `nginx:1.27-alpine`, patched OpenSSL and libexpat |
+| 503 from ALB | ECS service not registered to target group | Added `load_balancer` block and `depends_on` to ECS service in Terraform |
+| ErrImageNeverPull on EKS | `imagePullPolicy: Never` left from minikube config | Removed policy, EKS pulls from ECR directly |
+| EKS nodes cannot pull from ECR | Node IAM role missing ECR permissions | Added `AmazonEC2ContainerRegistryReadOnly` to node instance role |
+
+---
+
+## Stack
+
+```
+App           → HTML5 / CSS3 / JS / SVG — single file, no framework
+Server        → nginx:1.27-alpine
+Container     → Docker
+Registry      → AWS ECR (eu-central-1)
+Orchestration → AWS ECS Fargate + AWS EKS (Kubernetes)
+IaC           → Terraform (AWS provider ~> 5.0)
+K8s local     → minikube
+K8s cloud     → AWS EKS (eksctl, t3.small nodes)
+Pipeline      → GitHub Actions
+Security      → Hadolint, Trivy, AWS IAM, ACM, Security Groups
+DNS           → Route53 + Namecheap
+TLS           → ALB + ACM
+Environment   → Ubuntu 24 (VirtualBox), VS Code
+```
+
+---
+
+## Project Completion
+
+This project was built across multiple sessions as part of a deliberate transition from FTTP installation engineering into DevSecOps and cloud engineering. Every component was debugged and understood — not copied from a tutorial.
+
+**Skills demonstrated:**
+- Container build, scan and push pipeline with security gates
+- Infrastructure as Code with full destroy/rebuild cycle
+- Cloud container orchestration on ECS Fargate and EKS
+- Kubernetes core concepts — pods, deployments, services, scaling, self-healing, namespaces
+- TLS/HTTPS configuration end to end
+- Real CVE remediation and risk-based security decisions
+
+---
+
+## What's Next
+
+- [ ] Project 2 — enterprise-grade production environment:
+  - Multi-environment pipeline (dev → staging → production)
+  - EKS with IRSA, network policies, pod security standards
+  - Full observability — Prometheus, Grafana, ELK Stack
+  - GitOps with ArgoCD
+  - Ansible configuration management
+  - REST API with PostgreSQL backend
+  - Advanced security — Falco, GuardDuty, WAF, OPA/Gatekeeper, Checkov
+  - HashiCorp Vault / AWS Secrets Manager
+  - Terraform modules with remote state
+
+---
 
 **DeCrypToji** — transitioning from network infrastructure into DevSecOps
 - GitHub: [@DeCrypToji](https://github.com/DeCrypToji)
-- LinkedIn: https://www.linkedin.com/in/janali-miller-reid-0835101a2/
-
----
+- LinkedIn: [Janali Miller-Reid](https://www.linkedin.com/in/janali-miller-reid-0835101a2/)
 
 *Fan tribute — Jujutsu Kaisen © Gege Akutami / Shueisha*
